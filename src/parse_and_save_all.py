@@ -19,13 +19,12 @@ from src.parse_utils import (
 PROJECT_PATH = '..'
 
 wb_key = open(p_join(PROJECT_PATH, 'configs', 'wildberries_api64.txt'), mode='r', encoding='utf-8').read()
-today = datetime.now().date()
-yesterday = today - relativedelta(days=1)
+DATE = '2021-01-01'
 
 # Поставки
 print('Парсим поставки...')
 supplies_df = parse_supplies(
-    date_from=str(yesterday),
+    date_from=DATE,
     wb_key=wb_key,
 )
 print('ок')
@@ -33,7 +32,7 @@ print('ок')
 # Склад
 print('Парсим склад...')
 storage_df = parse_storage(
-    date_from=str(yesterday),
+    date_from=DATE,
     wb_key=wb_key,
 )
 print('ок')
@@ -41,25 +40,25 @@ print('ок')
 # Заказы
 print('Парсим заказы...')
 purchase_df = parse_purchases(
-    date_from=str(yesterday),
+    date_from=DATE,
     wb_key=wb_key,
-    flag=1,
+    flag=0,
 )
 print('ок')
 
 # Продажи
 print('Парсим продажи...')
 sales_df = parse_sales(
-    date_from=str(yesterday),
+    date_from=DATE,
     wb_key=wb_key,
-    flag=1,
+    flag=0,
 )
 print('ок')
 
 # Отчёт о продажах по реализации
 print('Парсим отчёт о продажах по реализации...')
 report_df = parse_report(
-    date_from=str(yesterday),
+    date_from=DATE,
     wb_key=wb_key,
     limit=100_000,
 )
@@ -85,7 +84,7 @@ if sales_df is not None:
             schema='wb_yarik',
             name='sales',
             con=eng,
-            if_exists='append'
+            if_exists='replace'
         )
         print('ок')
 
@@ -96,7 +95,7 @@ if purchase_df is not None:
             schema='wb_yarik',
             name='purchases',
             con=eng,
-            if_exists='append'
+            if_exists='replace'
         )
         print('ок')
 
@@ -107,7 +106,7 @@ if storage_df is not None:
             schema='wb_yarik',
             name='storage',
             con=eng,
-            if_exists='append'
+            if_exists='replace'
         )
         print('ок')
 
@@ -118,7 +117,7 @@ if supplies_df is not None:
             schema='wb_yarik',
             name='supplies',
             con=eng,
-            if_exists='append'
+            if_exists='replace'
         )
         print('ок')
 
@@ -129,6 +128,6 @@ if report_df is not None:
             schema='wb_yarik',
             name='report',
             con=eng,
-            if_exists='append'
+            if_exists='replace'
         )
         print('ок')
