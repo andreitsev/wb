@@ -22,53 +22,57 @@ eng = sa.create_engine(
 eng.connect()
 print('ок')
 
-
-daily_sales_df = pd.read_sql(
-    """
-    with t_agg as 
-    (
-        select 
-            supplierArticle
-            , techSize
-            , subject
-            , category
-            , brand
-            , cast(date as date) as day
-            , sum(quantity) as sum_quantity
-            , sum(quantity * totalPrice) as sum_totalPrice
-            , sum(quantity * pricewithdisc) as sum_pricewithdisc
-            , sum(quantity * forPay) as sum_forPay
-            , sum(quantity * finishedPrice) as sum_finishedPrice
+def make_daily_sales():
+    daily_sales_df = pd.read_sql(
+        """
+        with t_agg as 
+        (
+            select 
+                supplierArticle
+                , techSize
+                , subject
+                , category
+                , brand
+                , cast(date as date) as day
+                , sum(quantity) as sum_quantity
+                , sum(quantity * totalPrice) as sum_totalPrice
+                , sum(quantity * pricewithdisc) as sum_pricewithdisc
+                , sum(quantity * forPay) as sum_forPay
+                , sum(quantity * finishedPrice) as sum_finishedPrice
+            from
+                wb_yarik.sales
+            where
+                quantity > 0
+            group by
+                supplierArticle
+                , techSize
+                , subject
+                , category
+                , brand
+                , cast(date as date)
+            order by
+                cast(date as date) asc
+                , subject
+                , techSize
+                , date asc
+        )
+    
+        select
+            *
         from
-            wb_yarik.sales
-        where
-            quantity > 0
-        group by
-            supplierArticle
-            , techSize
-            , subject
-            , category
-            , brand
-            , cast(date as date)
-        order by
-            cast(date as date) asc
-            , subject
-            , techSize
-            , date asc
+            t_agg
+        """,
+        eng
     )
+    return daily_sales_df
 
-    select
-        *
-    from
-        t_agg
-    """,
-    eng
-)
-print(f"Сохраняем daily_sales...")
-daily_sales_df.to_sql(
-    schema='wb_yarik',
-    name='daily_sales',
-    con=eng,
-    if_exists='replace'
-)
-print('ок')
+if __name__ == '__main__':
+    daily_sales_df = make_daily_sales()
+    print(f"Сохраняем daily_sales...")
+    daily_sales_df.to_sql(
+        schema='wb_yarik',
+        name='daily_sales',
+        con=eng,
+        if_exists='replace'
+    )
+    print('ок')
