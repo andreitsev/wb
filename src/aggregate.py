@@ -25,16 +25,17 @@ print('ок')
 def make_daily_sales():
     daily_sales_df = pd.read_sql(
         """
-        with t_agg as 
-        (
+        with t_daily_sales as 
+        (   
             select 
                 supplierArticle
                 , techSize
                 , subject
                 , category
                 , brand
+                , barcode
                 , cast(date as date) as day
-                , sum(quantity) as sum_quantity
+                , sum(quantity) as sum_sales
                 , sum(quantity * totalPrice) as sum_totalPrice
                 , sum(quantity * pricewithdisc) as sum_pricewithdisc
                 , sum(quantity * forPay) as sum_forPay
@@ -47,6 +48,7 @@ def make_daily_sales():
                 supplierArticle
                 , techSize
                 , subject
+                , barcode
                 , category
                 , brand
                 , cast(date as date)
@@ -55,12 +57,52 @@ def make_daily_sales():
                 , subject
                 , techSize
                 , date asc
+        ),
+        
+        t_daily_purchases as 
+        (   
+            select 
+                supplierArticle
+                , techSize
+                , barcode
+                , cast(date as date) as day
+                , sum(quantity) as sum_purchases
+            from
+                wb_yarik.purchases
+            group by
+                supplierArticle
+                , techSize
+                , barcode
+                , cast(date as date)
         )
     
-        select
-            *
-        from
-            t_agg
+    select
+        t1.supplierArticle
+        , t1.techSize
+        , t1.subject
+        , t1.category
+        , t1.brand
+        , t1.barcode
+        , t1.day
+        
+        , t1.sum_sales
+        , t2.sum_purchases
+        
+        , t1.sum_totalPrice
+        , t1.sum_pricewithdisc
+        , t1.sum_forPay
+        , t1.sum_finishedPrice
+        
+    from
+        t_daily_sales t1
+        inner join
+            t_daily_purchases t2
+        on
+            1 = 1
+            and t1.supplierArticle = t2.supplierArticle
+            and t1.techSize = t2.techSize
+            and t1.day = t2.day
+            #and t1.barcode = t2.barcode
         """,
         eng
     )
