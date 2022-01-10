@@ -8,7 +8,9 @@ from dateutil.relativedelta import relativedelta
 import pandas as pd
 import sqlalchemy as sa
 
-from src.parse_utils import (
+print('Now:', str(datetime.now()))
+
+from parse_utils import (
     parse_supplies,
     parse_purchases,
     parse_sales,
