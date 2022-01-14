@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 print('Now:', str(datetime.now()))
 
-from parse_utils import (
+from src.parse_utils import (
     parse_supplies,
     parse_purchases,
     parse_sales,
@@ -79,49 +79,378 @@ eng = sa.create_engine(
 eng.connect()
 print('ок')
 
+
 if sales_df is not None:
     if len(sales_df) > 0:
-        print('Записываем продажи в db...')
+        print('Записываем продажи в tmp базу...')
         sales_df.to_sql(
             schema='wb_yarik',
-            name='sales',
+            name='sales_tmp',
             con=eng,
             if_exists='replace'
         )
-        print('ок')
+        print("ок")
+        print('t_main_sales union t_tmp_sales...')
+        tmp_df = pd.read_sql(
+                """
+                with t_main_sales as
+                    (
+                        select
+                            date
+                            , lastChangeDate
+                            , supplierArticle
+                            , techSize
+                            , barcode
+                            , quantity
+                            , totalPrice
+                            , discountPercent
+                            , isSupply
+                            , isRealization
+                            , orderId
+                            , promoCodeDiscount
+                            , warehouseName
+                            , countryName
+                            , oblastOkrugName
+                            , regionName
+                            , incomeID
+                            , saleID
+                            , odid
+                            , spp
+                            , forPay
+                            , finishedPrice
+                            , priceWithDisc
+                            , nmId
+                            , subject
+                            , category
+                            , brand
+                            , IsStorno
+                            , gNumber
+                        from
+                            wb_yarik.sales
+                    ),
+
+                    t_tmp_sales as
+                    (
+                        select
+                            date
+                            , lastChangeDate
+                            , supplierArticle
+                            , techSize
+                            , barcode
+                            , quantity
+                            , totalPrice
+                            , discountPercent
+                            , isSupply
+                            , isRealization
+                            , orderId
+                            , promoCodeDiscount
+                            , warehouseName
+                            , countryName
+                            , oblastOkrugName
+                            , regionName
+                            , incomeID
+                            , saleID
+                            , odid
+                            , spp
+                            , forPay
+                            , finishedPrice
+                            , priceWithDisc
+                            , nmId
+                            , subject
+                            , category
+                            , brand
+                            , IsStorno
+                            , gNumber
+                        from
+                            wb_yarik.sales_tmp
+                    )
+
+                select 
+                    *
+                from
+                    t_main_sales
+                union 
+
+                select 
+                    *
+                from
+                    t_tmp_sales
+                """,
+                eng
+            )
+        print("ок")
+        print('Сохраняем обновлённые sales...')
+        try:
+            tmp_df.to_sql(
+                schema='wb_yarik',
+                name='sales',
+                con=eng,
+                if_exists='replace'
+            )
+            print('ок')
+
+        except:
+            print('Что-то пошло не так: обновлённая таблица sales не сохранилась')
 
 if purchase_df is not None:
     if len(purchase_df) > 0:
-        print('Записываем заказы в db...')
+        print('Записываем заказы в tmp базу...')
         purchase_df.to_sql(
             schema='wb_yarik',
-            name='purchases',
+            name='purchases_tmp',
             con=eng,
             if_exists='replace'
         )
-        print('ок')
+        print("ок")
+        print('t_main_purchases union t_tmp_purchases...')
+        tmp_df = pd.read_sql(
+            """
+            with t_main as
+                (
+                    select
+                        date
+                        , lastChangeDate
+                        , supplierArticle
+                        , techSize
+                        , barcode
+                        , quantity
+                        , totalPrice
+                        , discountPercent
+                        , warehouseName
+                        , oblast
+                        , incomeID
+                        , odid
+                        , nmId
+                        , subject
+                        , category
+                        , brand
+                        , isCancel
+                        , cancel_dt
+                        , gNumber
+                    from
+                        wb_yarik.purchases
+                ),
+
+                t_tmp as
+                (
+                    select
+                        date
+                        , lastChangeDate
+                        , supplierArticle
+                        , techSize
+                        , barcode
+                        , quantity
+                        , totalPrice
+                        , discountPercent
+                        , warehouseName
+                        , oblast
+                        , incomeID
+                        , odid
+                        , nmId
+                        , subject
+                        , category
+                        , brand
+                        , isCancel
+                        , cancel_dt
+                        , gNumber
+                    from
+                        wb_yarik.purchases_tmp
+                )
+
+            select 
+                *
+            from
+                t_main
+            union 
+
+            select 
+                *
+            from
+                t_tmp
+            """,
+            eng
+        )
+        try:
+            tmp_df.to_sql(
+                schema='wb_yarik',
+                name='purchases',
+                con=eng,
+                if_exists='replace'
+            )
+            print('ок')
+
+        except:
+            print('Что-то пошло не так: обновлённая таблица purchases не сохранилась')
 
 if storage_df is not None:
     if len(storage_df) > 0:
-        print('Записываем склад в db...')
+        print('Записываем склад в tmp базу...')
         storage_df.to_sql(
             schema='wb_yarik',
-            name='storage',
+            name='storage_tmp',
             con=eng,
             if_exists='replace'
         )
-        print('ок')
+        print("ок")
+        print('t_main_storage union t_tmp_storage...')
+        tmp_df = pd.read_sql(
+            """
+            with t_main as
+                (
+                    select
+                        lastChangeDate
+                        , supplierArticle
+                        , techSize
+                        , barcode
+                        , quantity
+                        , isSupply
+                        , isRealization
+                        , quantityFull
+                        , quantityNotInOrders
+                        , warehouseName
+                        , inWayToClient
+                        , inWayFromClient
+                        , nmId
+                        , subject
+                        , category
+                        , daysOnSite
+                        , brand
+                        , SCCode
+                        , Price
+                        , Discount
+                    from
+                        wb_yarik.storage
+                ),
+
+                t_tmp as
+                (
+                    select
+                        lastChangeDate
+                        , supplierArticle
+                        , techSize
+                        , barcode
+                        , quantity
+                        , isSupply
+                        , isRealization
+                        , quantityFull
+                        , quantityNotInOrders
+                        , warehouseName
+                        , inWayToClient
+                        , inWayFromClient
+                        , nmId
+                        , subject
+                        , category
+                        , daysOnSite
+                        , brand
+                        , SCCode
+                        , Price
+                        , Discount
+                    from
+                        wb_yarik.storage_tmp
+                )
+
+            select 
+                *
+            from
+                t_main
+            union 
+
+            select 
+                *
+            from
+                t_tmp
+            """,
+            eng
+        )
+        try:
+            tmp_df.to_sql(
+                schema='wb_yarik',
+                name='storage',
+                con=eng,
+                if_exists='replace'
+            )
+            print('ок')
+
+        except:
+            print('Что-то пошло не так: обновлённая таблица storage не сохранилась')
 
 if supplies_df is not None:
     if len(supplies_df) > 0:
-        print('Записываем поставки в db...')
+        print('Записываем поставки в tmp базу...')
         supplies_df.to_sql(
             schema='wb_yarik',
-            name='supplies',
+            name='supplies_tmp',
             con=eng,
             if_exists='replace'
         )
-        print('ок')
+        print("ок")
+        print('t_main_supplies union t_tmp_supplies...')
+        tmp_df = pd.read_sql(
+            """
+            with t_main as
+                (
+                    select
+                        incomeId
+                        , number
+                        , date
+                        , lastChangeDate
+                        , supplierArticle
+                        , techSize
+                        , barcode
+                        , quantity
+                        , totalPrice
+                        , dateClose
+                        , warehouseName
+                        , nmId
+                        , status
+                    from
+                        wb_yarik.supplies
+                ),
+
+                t_tmp as
+                (
+                    select
+                        incomeId
+                        , number
+                        , date
+                        , lastChangeDate
+                        , supplierArticle
+                        , techSize
+                        , barcode
+                        , quantity
+                        , totalPrice
+                        , dateClose
+                        , warehouseName
+                        , nmId
+                        , status
+                    from
+                        wb_yarik.supplies_tmp
+                )
+
+            select 
+                *
+            from
+                t_main
+            union 
+
+            select 
+                *
+            from
+                t_tmp
+            """,
+            eng
+        )
+        try:
+            tmp_df.to_sql(
+                schema='wb_yarik',
+                name='supplies',
+                con=eng,
+                if_exists='replace'
+            )
+            print('ок')
+
+        except:
+            print('Что-то пошло не так: обновлённая таблица supplies не сохранилась')
 
 if report_df is not None:
     if len(report_df) > 0:
