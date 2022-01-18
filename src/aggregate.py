@@ -90,7 +90,7 @@ def make_daily_sales():
             
             , t1.sum_sales
             , t1.sum_returned
-            , t2.sum_purchases
+            , coalesce(t2.sum_purchases, 0) as sum_purchases
             
             , t1.sum_totalPrice
             , t1.sum_pricewithdisc
@@ -104,7 +104,7 @@ def make_daily_sales():
             
         from
             t_daily_sales t1
-            inner join
+            left join
                 t_daily_purchases t2
             on
                 1 = 1
