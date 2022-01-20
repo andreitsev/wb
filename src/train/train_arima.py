@@ -119,7 +119,7 @@ def train_arimas() -> Dict[str, Callable]:
         ensure_ascii=False
     )
     print('ок')
-    return models_dict
+    return models_dict, max_date
 
 if __name__ == '__main__':
     train_arimas()
