@@ -65,7 +65,7 @@ def train_arimas() -> Dict[str, Callable]:
     arima_start_time = time.perf_counter()
     models_dict = {}
     for subject in tqdm(df_for_forecast.subject.unique()):
-        print(f'Обучаем ARIMA для subject={subject}...')
+        print('='*4 + f'Обучаем ARIMA для subject={subject}...' + '='*50, end='\n'*2)
         try:
             st = time.perf_counter()
             arima_model = auto_arima(
@@ -93,10 +93,10 @@ def train_arimas() -> Dict[str, Callable]:
             )
             print('ок')
             end_ = time.perf_counter()
-            print(f"Модель для {subject} обучилась за {(end_ - st) // 60} минут {(end_ - st) % 60} секунд")
+            print(f"Модель для {subject} обучилась за {(end_ - st) // 60} минут {(end_ - st) % 60} секунд", end='\n'*2)
             models_dict[subject] = arima_model
         except:
-            print(f"Не получилось обучить arima для {subject}!")
+            print(f"Не получилось обучить arima для {subject}!", end='\n'*2)
 
     arima_end_time = time.perf_counter()
     print(
