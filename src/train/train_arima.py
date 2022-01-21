@@ -17,8 +17,11 @@ from pmdarima.arima import auto_arima
 from src.utils import create_wb_db_connection
 
 eng = create_wb_db_connection()
-PROJECT_PATH = os.environ["PYTHONPATH"]
-os.chdir(PROJECT_PATH)
+if 'PYTHONPATH' in os.environ:
+    PROJECT_PATH = os.environ["PYTHONPATH"]
+    os.chdir(PROJECT_PATH)
+else:
+    PROJECT_PATH = '..'
 
 today = str(datetime.now().date())
 

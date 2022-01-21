@@ -15,8 +15,11 @@ from src.utils import create_wb_db_connection
 from pmdarima.arima import auto_arima
 
 eng = create_wb_db_connection()
-PROJECT_PATH = os.environ["PYTHONPATH"]
-os.chdir(PROJECT_PATH)
+if 'PYTHONPATH' in os.environ:
+    PROJECT_PATH = os.environ["PYTHONPATH"]
+    os.chdir(PROJECT_PATH)
+else:
+    PROJECT_PATH = '..'
 
 def find_latest_model() -> str:
     now = datetime.now()
