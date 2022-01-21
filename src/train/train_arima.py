@@ -9,7 +9,7 @@ import sys
 sys.path.insert(0, '..')
 import time
 
-from typing import Dict, Callable
+from typing import Dict, Callable, List
 import numpy as np
 import pandas as pd
 from pmdarima.arima import auto_arima
