@@ -3,6 +3,7 @@ from os.path import join as p_join
 import sys
 sys.path.insert(0, '..')
 import time
+from datetime import datetime
 import json
 import pickle
 from tqdm import tqdm
@@ -16,14 +17,33 @@ from pmdarima.arima import auto_arima
 eng = create_wb_db_connection()
 PROJECT_PATH = '..'
 
+def find_latest_model() -> str:
+    now = datetime.now()
+    current_min_days_diff = np.inf
+    latest_model = None
+    for folder in os.listdir(p_join(PROJECT_PATH, 'models')):
+        if '=' in folder:
+            models_train_date = folder.split('=')[-1]
+            curr_diff = (now - pd.Timestamp(models_train_date)).days
+            if curr_diff <= current_min_days_diff:
+                current_min_days_diff = curr_diff
+                latest_model = folder
+        else:
+            print(f'у модели {folder} нет даты обучения в названии!')
+            continue
+    return latest_model
+
 
 def make_forecast(schema: str='wb_yarik', table_name: str='daily_sales_forecasts', eng: object=eng,
-                  n_steps_forecast: int=30) -> None:
+                  n_steps_forecast: int=30, model_name: str=None) -> None:
+    if model_name is None:
+        model_name = find_latest_model()
+
     models_dict = pickle.load(
-        open(p_join(PROJECT_PATH, 'models', 'subjects_arima_models', 'arima_models.pkl'), mode='rb')
+        open(p_join(PROJECT_PATH, 'models', model_name, 'arima_models.pkl'), mode='rb')
     )
     max_train_date = json.load(
-        open(p_join(PROJECT_PATH, 'models', 'subjects_arima_models', 'dates.json'), mode='r', encoding='utf-8'),
+        open(p_join(PROJECT_PATH, 'models', model_name, 'dates.json'), mode='r', encoding='utf-8'),
     )['max_train_date']
 
     forecast_df = None
