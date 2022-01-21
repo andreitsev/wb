@@ -6,7 +6,7 @@ from tqdm import tqdm
 import os
 from os.path import join as p_join
 import sys
-sys.path.insert(0, '..')
+sys.path.insert(0, '../..')
 import time
 
 from typing import Dict, Callable, List
@@ -17,7 +17,7 @@ from pmdarima.arima import auto_arima
 from src.utils import create_wb_db_connection
 
 eng = create_wb_db_connection()
-PROJECT_PATH = '..'
+PROJECT_PATH = '../..'
 today = str(datetime.now().date())
 
 
