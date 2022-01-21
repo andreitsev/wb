@@ -89,6 +89,7 @@ def train_arimas(subjects_list: List[str]=None, save_models: bool=True) -> Dict[
     """
 
     df_for_forecast = make_df_for_arima(subjects_list=subjects_list)
+    min_date, max_date = df_for_forecast['day'].min(), df_for_forecast['day'].max()
 
     # Обучаем Аримы ----------------------------------------------------
     print("Обучаем Аримы...")
