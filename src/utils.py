@@ -2,10 +2,11 @@ import json
 import os
 from os.path import join as p_join
 import sys
-sys.path.insert(0, '..')
+# sys.path.insert(0, '..')
 import sqlalchemy as sa
 
-PROJECT_PATH = '..'
+PROJECT_PATH = os.environ["PYTHONPATH"]
+os.chdir(PROJECT_PATH)
 
 wb_key = open(p_join(PROJECT_PATH, 'configs', 'wildberries_api64.txt'), mode='r', encoding='utf-8').read()
 var_name_dict = json.load(

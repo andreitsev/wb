@@ -1,7 +1,7 @@
 import os
 from os.path import join as p_join
 import sys
-sys.path.insert(0, '../..')
+# sys.path.insert(0, '..')
 import time
 from datetime import datetime
 import json
@@ -15,7 +15,8 @@ from src.utils import create_wb_db_connection
 from pmdarima.arima import auto_arima
 
 eng = create_wb_db_connection()
-PROJECT_PATH = '../..'
+PROJECT_PATH = os.environ["PYTHONPATH"]
+os.chdir(PROJECT_PATH)
 
 def find_latest_model() -> str:
     now = datetime.now()
