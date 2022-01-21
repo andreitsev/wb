@@ -1,6 +1,7 @@
 import pickle
 import time
 import json
+from datetime import datetime
 from tqdm import tqdm
 import os
 from os.path import join as p_join
@@ -17,8 +18,17 @@ from src.utils import create_wb_db_connection
 
 eng = create_wb_db_connection()
 PROJECT_PATH = '..'
+today = str(datetime.now().date())
 
-def train_arimas() -> Dict[str, Callable]:
+
+def make_df_for_arima(subjects_list: List[str]=None) -> pd.DataFrame:
+
+    """
+    Подготавливает датафрейм для обучения Арима моделей (на основе ежедневных продаж wb_yarik.daily_sales)
+    :param subjects_list: Список subject'ов для которых вернуть датафрейм
+    :return:
+        Датафрейм с дневными продажами каждого subject'а
+    """
 
     df_for_forecast = pd.read_sql(
         """
@@ -35,6 +45,9 @@ def train_arimas() -> Dict[str, Callable]:
         """,
         eng
     )
+
+    if subjects_list is not None:
+        df_for_forecast = df_for_forecast.loc[(df_for_forecast['subject'].isin(set(subjects_list)))]
 
     df_for_forecast['day'] = pd.to_datetime(df_for_forecast['day'])
 
@@ -59,12 +72,29 @@ def train_arimas() -> Dict[str, Callable]:
 
     df_for_forecast['sum_sales'].fillna(0, inplace=True)
     df_for_forecast['subject'].fillna(method='ffill', inplace=True)
+    return df_for_forecast
+
+
+
+def train_arimas(subjects_list: List[str]=None, save_models: bool=True) -> Dict[str, Callable]:
+
+    """
+    Обучает Арима модели для subject'ов
+    :param subjects_list: Список subject для которых обучать аримы
+    :param save_models: Сохранять ли словарь с моделями
+    :return:
+        Словарь с моделями:
+            ключ - название subject'а
+            значение - обученная модель класса pmdarima.arima.auto_arima
+    """
+
+    df_for_forecast = make_df_for_arima(subjects_list=subjects_list)
 
     # Обучаем Аримы ----------------------------------------------------
     print("Обучаем Аримы...")
     arima_start_time = time.perf_counter()
     models_dict = {}
-    for subject in tqdm(df_for_forecast.subject.unique()):
+    for subject in tqdm(df_for_forecast.subject.unique()) if subjects_list is None else tqdm(subjects_list):
         print('='*4 + f'Обучаем ARIMA для subject={subject}...' + '='*50, end='\n'*2)
         try:
             st = time.perf_counter()
@@ -102,24 +132,26 @@ def train_arimas() -> Dict[str, Callable]:
     print(
         f"Аримы для всех subjects обучились за {(arima_end_time - arima_start_time) // 60} минут {(arima_end_time - arima_start_time) % 60} секунд")
 
-    print("Сохраняем модели...")
-    if 'subjects_arima_models' not in os.listdir(p_join(PROJECT_PATH, 'models')):
-        os.mkdir(p_join(PROJECT_PATH, 'models', 'subjects_arima_models'))
-    pickle.dump(
-        models_dict,
-        open(p_join(PROJECT_PATH, 'models', 'subjects_arima_models', 'arima_models.pkl'), mode='wb')
-    )
-    json.dump(
-        {
-            "min_train_date": str(min_date.date()),
-            "max_train_date": str(max_date.date()),
-        },
-        open(p_join(PROJECT_PATH, 'models', 'subjects_arima_models', 'dates.json'), mode='w', encoding='utf-8'),
-        indent=2,
-        ensure_ascii=False
-    )
-    print('ок')
+    if save_models:
+        print("Сохраняем модели...")
+        models_name = f'subjects_arima_models_calcdate={today}'
+        if models_name not in os.listdir(p_join(PROJECT_PATH, 'models')):
+            os.mkdir(p_join(PROJECT_PATH, 'models', models_name))
+        pickle.dump(
+            models_dict,
+            open(p_join(PROJECT_PATH, 'models', models_name, 'arima_models.pkl'), mode='wb')
+        )
+        json.dump(
+            {
+                "min_train_date": str(min_date.date()),
+                "max_train_date": str(max_date.date()),
+            },
+            open(p_join(PROJECT_PATH, 'models', models_name, 'dates.json'), mode='w', encoding='utf-8'),
+            indent=2,
+            ensure_ascii=False
+        )
+        print('ок')
     return models_dict, max_date
 
 if __name__ == '__main__':
-    train_arimas()
+    _ = train_arimas()
