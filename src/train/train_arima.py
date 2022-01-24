@@ -18,7 +18,10 @@ from pmdarima.arima import auto_arima
 
 from src.utils import create_wb_db_connection
 
-eng = create_wb_db_connection()
+try:
+    eng = create_wb_db_connection()
+except:
+    print('Не удалось подключиться к базе!')
 if 'PYTHONPATH' in os.environ:
     PROJECT_PATH = os.environ["PYTHONPATH"]
     os.chdir(PROJECT_PATH)
@@ -188,7 +191,9 @@ if __name__ == '__main__':
     df_load_path = args.df_load_path
     need_model_training = args.need_model_training
 
-    _ = make_df_for_arima(save_path=df_save_path)
+    if df_save_path is not None:
+        eng = create_wb_db_connection()
+        _ = make_df_for_arima(save_path=df_save_path)
 
     if need_model_training:
         _ = train_arimas(df_for_training_path=df_load_path)
