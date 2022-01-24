@@ -88,19 +88,23 @@ def make_df_for_arima(subjects_list: List[str]=None, save_path: str=None) -> pd.
 
 
 
-def train_arimas(subjects_list: List[str]=None, save_models: bool=True) -> Dict[str, Callable]:
+def train_arimas(subjects_list: List[str]=None, save_models: bool=True, df_for_training_path: str=None) -> Dict[str, Callable]:
 
     """
     Обучает Арима модели для subject'ов
     :param subjects_list: Список subject для которых обучать аримы
     :param save_models: Сохранять ли словарь с моделями
+    :param df_for_training_path: путь до датафрейма для обучения
     :return:
         Словарь с моделями:
             ключ - название subject'а
             значение - обученная модель класса pmdarima.arima.auto_arima
     """
 
-    df_for_forecast = make_df_for_arima(subjects_list=subjects_list)
+    if df_for_training_path is not None:
+        df_for_forecast = pd.read_csv(df_for_training_path)
+    else:
+        df_for_forecast = make_df_for_arima(subjects_list=subjects_list)
     min_date, max_date = df_for_forecast['day'].min(), df_for_forecast['day'].max()
 
     # Обучаем Аримы ----------------------------------------------------
@@ -170,6 +174,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--df_save_path", help="Путь, куда сохранять датафрейм для обучения арима моделей",
                         type=str, default=None)
+    parser.add_argument("--df_load_path", help="Путь, откуда взять сохранённый датафрейм для обучения арима моделей",
+                        type=str, default=None)
 
     # Обучать ли Арима модели
     feature_parser = parser.add_mutually_exclusive_group(required=False)
@@ -179,9 +185,10 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     df_save_path = args.df_save_path
+    df_load_path = args.df_load_path
     need_model_training = args.need_model_training
 
     _ = make_df_for_arima(save_path=df_save_path)
 
     if need_model_training:
-        _ = train_arimas()
+        _ = train_arimas(df_for_training_path=df_load_path)
