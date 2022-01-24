@@ -9,6 +9,8 @@ import sys
 # sys.path.insert(0, '..')
 import time
 
+import argparse
+
 from typing import Dict, Callable, List
 import numpy as np
 import pandas as pd
@@ -25,8 +27,7 @@ else:
 
 today = str(datetime.now().date())
 
-
-def make_df_for_arima(subjects_list: List[str]=None) -> pd.DataFrame:
+def make_df_for_arima(subjects_list: List[str]=None, save_path: str=None) -> pd.DataFrame:
 
     """
     Подготавливает датафрейм для обучения Арима моделей (на основе ежедневных продаж wb_yarik.daily_sales)
@@ -77,6 +78,12 @@ def make_df_for_arima(subjects_list: List[str]=None) -> pd.DataFrame:
 
     df_for_forecast['sum_sales'].fillna(0, inplace=True)
     df_for_forecast['subject'].fillna(method='ffill', inplace=True)
+
+    if save_path is not None:
+        print(f'Сохраняем df_for_forecast в {save_path}...')
+        df_for_forecast.to_csv(save_path, index=False)
+        print('ок')
+
     return df_for_forecast
 
 
@@ -160,4 +167,21 @@ def train_arimas(subjects_list: List[str]=None, save_models: bool=True) -> Dict[
     return models_dict, max_date
 
 if __name__ == '__main__':
-    _ = train_arimas()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--df_save_path", help="Путь, куда сохранять датафрейм для обучения арима моделей",
+                        type=str, default=None)
+
+    # Обучать ли Арима модели
+    feature_parser = parser.add_mutually_exclusive_group(required=False)
+    feature_parser.add_argument('--train', dest='need_model_training', action='store_true')
+    feature_parser.add_argument('--no-train', dest='need_model_training', action='store_false')
+    parser.set_defaults(need_model_training=True)
+
+    args = parser.parse_args()
+    df_save_path = args.df_save_path
+    need_model_training = args.need_model_training
+
+    _ = make_df_for_arima(save_path=df_save_path)
+
+    if need_model_training:
+        _ = train_arimas()
