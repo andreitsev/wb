@@ -41,10 +41,13 @@ def find_latest_model() -> str:
     return latest_model
 
 
-def make_forecast(schema: str='wb_yarik', table_name: str='daily_sales_forecasts', eng: object=eng,
-                  n_steps_forecast: int=30, model_name: str=None) -> None:
+def make_forecast(schema: str='wb_yarik', table_name: str='daily_sales_forecasts', eng: object=None,
+                  n_steps_forecast: int=30, model_name: str=None) -> pd.DataFrame:
     if model_name is None:
         model_name = find_latest_model()
+
+    if schema is not None and table_name is not None and eng is None:
+        eng = create_wb_db_connection()
 
     models_dict = pickle.load(
         open(p_join(PROJECT_PATH, 'models', model_name, 'arima_models.pkl'), mode='rb')
@@ -72,15 +75,16 @@ def make_forecast(schema: str='wb_yarik', table_name: str='daily_sales_forecasts
             forecast_df[f'{subject}_forecast_confint_lower'] = confint[:, 0]
             forecast_df[f'{subject}_forecast_confint_upper'] = confint[:, 1]
 
-    print(f"Сохраняем предсказания...")
-    forecast_df.to_sql(
-        schema=schema,
-        name=table_name,
-        con=eng,
-        if_exists='replace'
-    )
-    print("ок")
-    return
+    if schema is not None and table_name is not None:
+        print(f"Сохраняем предсказания...")
+        forecast_df.to_sql(
+            schema=schema,
+            name=table_name,
+            con=eng,
+            if_exists='replace'
+        )
+        print("ок")
+    return forecast_df
 
 if __name__ == '__main__':
     make_forecast()
