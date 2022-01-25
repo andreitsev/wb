@@ -163,8 +163,8 @@ def train_arimas(subjects_list: List[str]=None, save_models: bool=True, df_for_t
         )
         json.dump(
             {
-                "min_train_date": str(min_date.date()),
-                "max_train_date": str(max_date.date()),
+                "min_train_date": str(min_date.date() if 'date' in dir(min_date) else min_date),
+                "max_train_date": str(max_date.date() if 'date' in dir(max_date) else max_date),
             },
             open(p_join(PROJECT_PATH, 'models', models_name, 'dates.json'), mode='w', encoding='utf-8'),
             indent=2,
