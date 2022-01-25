@@ -11,10 +11,10 @@ from tqdm import tqdm
 import numpy as np
 import pandas as pd
 
-from src.utils import create_wb_db_connection
 from pmdarima.arima import auto_arima
 
 try:
+    from src.utils import create_wb_db_connection
     eng = create_wb_db_connection()
 except:
     print("Не удалось установить подключение к базе данных!")
