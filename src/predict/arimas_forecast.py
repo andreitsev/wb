@@ -14,7 +14,10 @@ import pandas as pd
 from src.utils import create_wb_db_connection
 from pmdarima.arima import auto_arima
 
-eng = create_wb_db_connection()
+try:
+    eng = create_wb_db_connection()
+except:
+    print("Не удалось установить подключение к базе данных!")
 if 'PYTHONPATH' in os.environ:
     PROJECT_PATH = os.environ["PYTHONPATH"]
     os.chdir(PROJECT_PATH)
