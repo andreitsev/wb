@@ -35,16 +35,20 @@ def make_daily_sales():
                     , brand
                     , barcode
                     , cast(date as date) as day
+                    , sum(case when quantity > 0 then totalPrice else 0 end) / sum(case when quantity > 0 then 1 else 0 end) as avg_totalPrice
+                    , sum(case when quantity > 0 then pricewithdisc else 0 end) / sum(case when quantity > 0 then 1 else 0 end) as avg_pricewithdisc
+                    , sum(case when quantity > 0 then forPay else 0 end) / sum(case when quantity > 0 then 1 else 0 end) as avg_forPay
+                    , sum(case when quantity > 0 then finishedPrice else 0 end) / sum(case when quantity > 0 then 1 else 0 end) as avg_finishedPrice
                     , sum(case when quantity > 0 then quantity else 0 end) as sum_sales
                     , abs(sum(case when quantity < 0 then quantity else 0 end)) as sum_returned
-                    , sum(case when quantity > 0 then quantity * totalPrice else 0 end) as sum_totalPrice
-                    , sum(case when quantity > 0 then quantity * pricewithdisc else 0 end) as sum_pricewithdisc
-                    , sum(case when quantity > 0 then quantity * forPay else 0 end) as sum_forPay
-                    , sum(case when quantity > 0 then quantity * finishedPrice else 0 end) as sum_finishedPrice
-                    , abs(sum(case when quantity < 0 then quantity * totalPrice else 0 end)) as sum_totalPrice_returned
-                    , abs(sum(case when quantity < 0 then quantity * pricewithdisc else 0 end)) as sum_pricewithdisc_returned
-                    , abs(sum(case when quantity < 0 then quantity * forPay else 0 end)) as sum_forPay_returned
-                    , abs(sum(case when quantity < 0 then quantity * finishedPrice else 0 end)) as sum_finishedPrice_returned
+                    , sum(case when quantity > 0 then quantity * totalPrice else 0 end) as sum_q_totalPrice
+                    , sum(case when quantity > 0 then quantity * pricewithdisc else 0 end) as sum_q_pricewithdisc
+                    , sum(case when quantity > 0 then quantity * forPay else 0 end) as sum_q_forPay
+                    , sum(case when quantity > 0 then quantity * finishedPrice else 0 end) as sum_q_finishedPrice
+                    , abs(sum(case when quantity < 0 then quantity * totalPrice else 0 end)) as sum_q_totalPrice_returned
+                    , abs(sum(case when quantity < 0 then quantity * pricewithdisc else 0 end)) as sum_q_pricewithdisc_returned
+                    , abs(sum(case when quantity < 0 then quantity * forPay else 0 end)) as sum_q_forPay_returned
+                    , abs(sum(case when quantity < 0 then quantity * finishedPrice else 0 end)) as sum_q_finishedPrice_returned
                 from
                     wb_yarik.sales
                 group by
