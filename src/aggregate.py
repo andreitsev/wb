@@ -97,19 +97,24 @@ def make_daily_sales():
             , t1.barcode
             , t1.day
             
+            , t1.avg_totalPrice
+            , t1.avg_pricewithdisc
+            , t1.avg_forPay
+            , t1.avg_finishedPrice
+            
             , t1.sum_sales
             , t1.sum_returned
             , coalesce(t2.sum_purchases, 0) as sum_purchases
             
-            , t1.sum_totalPrice
-            , t1.sum_pricewithdisc
-            , t1.sum_forPay
-            , t1.sum_finishedPrice
+            , t1.sum_q_totalPrice
+            , t1.sum_q_pricewithdisc
+            , t1.sum_q_forPay
+            , t1.sum_q_finishedPrice
             
-            , t1.sum_totalPrice_returned
-            , t1.sum_pricewithdisc_returned
-            , t1.sum_forPay_returned
-            , t1.sum_finishedPrice_returned
+            , t1.sum_q_totalPrice_returned
+            , t1.sum_q_pricewithdisc_returned
+            , t1.sum_q_forPay_returned
+            , t1.sum_q_finishedPrice_returned
             
         from
             t_daily_sales t1
