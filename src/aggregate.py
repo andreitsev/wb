@@ -7,7 +7,11 @@ import pandas as pd
 import sqlalchemy as sa
 
 
-PROJECT_PATH = '..'
+if 'PYTHONPATH' in os.environ:
+    PROJECT_PATH = os.environ["PYTHONPATH"]
+    os.chdir(PROJECT_PATH)
+else:
+    PROJECT_PATH = '..'
 
 wb_key = open(p_join(PROJECT_PATH, 'configs', 'wildberries_api64.txt'), mode='r', encoding='utf-8').read()
 sql_db_credentials = json.load(
