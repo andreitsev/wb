@@ -1,3 +1,4 @@
+from typing import Dict
 import json
 import os
 from os.path import join as p_join
@@ -19,10 +20,11 @@ var_name_dict = json.load(
 sql_db_credentials = json.load(
     open(p_join(PROJECT_PATH, 'configs', 'sql_db_creadentials.json'), mode='r', encoding='utf-8')
 )
-db = 'yarik'
 
-
-def create_wb_db_connection() -> object:
+def create_wb_db_connection(
+        db: str='yarik',
+        sql_db_credentials: Dict[str, Dict]=sql_db_credentials,
+) -> object:
     login = sql_db_credentials[db]['login']
     passwd = sql_db_credentials[db]['password']
     host = sql_db_credentials[db]['host']

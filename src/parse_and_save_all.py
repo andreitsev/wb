@@ -1,6 +1,7 @@
 import sys
 sys.path.insert(0, '..')
 import json
+import os
 from os.path import join as p_join
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
@@ -8,7 +9,7 @@ from dateutil.relativedelta import relativedelta
 import pandas as pd
 import sqlalchemy as sa
 
-print('Now:', str(datetime.now()))
+print('='*4 + 'Now:' + str(datetime.now()) + '='*40, end='\n'*2)
 
 from src.parse_utils import (
     parse_supplies,
@@ -18,7 +19,19 @@ from src.parse_utils import (
     parse_report
 )
 
-PROJECT_PATH = '..'
+from src.utils import create_wb_db_connection
+
+try:
+    print('Инициализируем подключение к db...')
+    eng = create_wb_db_connection()
+except:
+    print('Не удалось подключиться к базе!')
+
+if 'PYTHONPATH' in os.environ:
+    PROJECT_PATH = os.environ["PYTHONPATH"]
+    os.chdir(PROJECT_PATH)
+else:
+    PROJECT_PATH = '..'
 
 wb_key = open(p_join(PROJECT_PATH, 'configs', 'wildberries_api64.txt'), mode='r', encoding='utf-8').read()
 DATE = '2021-01-01'
@@ -64,19 +77,6 @@ report_df = parse_report(
     wb_key=wb_key,
     limit=100_000,
 )
-print('ок')
-
-
-sql_db_credentials = json.load(
-    open(p_join(PROJECT_PATH, 'configs', 'sql_db_creadentials.json'), mode='r', encoding='utf-8')
-)
-
-print('Инициализируем подключение к db...')
-db = 'yarik'
-eng = sa.create_engine(
-    f"mysql+pymysql://{sql_db_credentials[db]['login']}:{sql_db_credentials[db]['password']}@{sql_db_credentials[db]['host']}:{sql_db_credentials[db]['port']}"
-)
-eng.connect()
 print('ок')
 
 
