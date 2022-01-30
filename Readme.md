@@ -26,3 +26,33 @@
     │   └── train_arima.py
     └── utils.py
 </pre>
+
+Пайплайн использования: (находясь в папке  проекта)
+
+0) 
+```shell
+source env.sh
+```
+1) Парсинг данных (и сохранение их в mysql базу данных)
+```python
+python3 src/parse_and_save_all.py
+```
+2) Получение дневных продаж из сырых (и сохранение их в mysql базу данных)
+```python
+python3 src/aggregate.py
+```
+3) Обучение Арима моделей 
+```python
+python3 src/train/train_arima.py
+```
+4) Получение скоров от Арима моделей
+```python
+python3 src/predict/arimas_forecast.py
+```
+5) Развёртываение Metabase в докере для BI аналитики
+```shell
+docker run -d --name meta -p 3000:3000 \
+          -v $PWD/metabase-data:/metabase-data \
+          -e "MB_DB_FILE=/metabase-data/metabase.db" \
+        metabase/metabase
+```
