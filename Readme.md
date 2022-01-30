@@ -16,9 +16,9 @@
 │       ├── all_subjects_daily_sales.sql 
 │       └── cutlery_daily_sales_and_forecasts.sql
 └── src
-    ├── aggregate.py
+    ├── aggregate.py  ->  Составление дневных продаж из сырых
     ├── parse_and_save.py
-    ├── parse_and_save_all.py
+    ├── parse_and_save_all.py  ->  Парсинг данных wb (с использованием ключа)
     ├── parse_utils.py
     ├── predict
     │   └── arimas_forecast.py
