@@ -56,3 +56,7 @@ docker run -d --name meta -p 3000:3000 \
           -e "MB_DB_FILE=/metabase-data/metabase.db" \
         metabase/metabase
 ```
+
+Пример полученного дашборда:
+
+![image](https://user-images.githubusercontent.com/27732957/152297312-b15bebe2-34c0-48cd-9d3c-03ca1ad21c52.png)
