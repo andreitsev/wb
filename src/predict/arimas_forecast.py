@@ -7,6 +7,7 @@ from datetime import datetime
 import json
 import pickle
 from tqdm import tqdm
+import argparse
 
 import numpy as np
 import pandas as pd
@@ -59,21 +60,26 @@ def make_forecast(schema: str='wb_yarik', table_name: str='daily_sales_forecasts
     forecast_df = None
 
     for subject in tqdm(models_dict):
-        preds, confint = models_dict[subject].predict(n_periods=n_steps_forecast, return_conf_int=True)
-        preds = np.array([max(val, 0) for val in preds])
-        forecast_dates = [(pd.Timestamp(max_train_date) + pd.DateOffset(days=i)).date() for i in range(1, n_steps_forecast + 1)]
-
-        if forecast_df is None:
-            forecast_df = pd.DataFrame({
-                "day": forecast_dates,
-                f'{subject}_forecast': preds,
-                f'{subject}_forecast_confint_lower': confint[:, 0],
-                f'{subject}_forecast_confint_upper': confint[:, 1],
-            })
-        else:
-            forecast_df[f'{subject}_forecast'] = preds
-            forecast_df[f'{subject}_forecast_confint_lower'] = confint[:, 0]
-            forecast_df[f'{subject}_forecast_confint_upper'] = confint[:, 1]
+        print(f'Предсказания для {subject}...')
+        try:
+            preds, confint = models_dict[subject].predict(n_periods=n_steps_forecast, return_conf_int=True)
+            preds = np.array([max(val, 0) for val in preds])
+            forecast_dates = [(pd.Timestamp(max_train_date) + pd.DateOffset(days=i)).date() for i in range(1, n_steps_forecast + 1)]
+    
+            if forecast_df is None:
+                forecast_df = pd.DataFrame({
+                    "day": forecast_dates,
+                    f'{subject}_forecast': preds,
+                    f'{subject}_forecast_confint_lower': confint[:, 0],
+                    f'{subject}_forecast_confint_upper': confint[:, 1],
+                })
+            else:
+                forecast_df[f'{subject}_forecast'] = preds
+                forecast_df[f'{subject}_forecast_confint_lower'] = confint[:, 0]
+                forecast_df[f'{subject}_forecast_confint_upper'] = confint[:, 1]
+            print('ок!')
+        except:
+            print(f"Не удалось выполнить предсказания для {subject}!")
 
     if schema is not None and table_name is not None:
         print(f"Сохраняем предсказания...")
@@ -87,4 +93,15 @@ def make_forecast(schema: str='wb_yarik', table_name: str='daily_sales_forecasts
     return forecast_df
 
 if __name__ == '__main__':
-    make_forecast()
+    parser = argparse.ArgumentParser()
+    feature_parser = parser.add_mutually_exclusive_group(required=False)
+    feature_parser.add_argument('--store_db', dest='db_store', action='store_true')
+    feature_parser.add_argument('--dont_store_db', dest='db_store', action='store_false')
+    parser.set_defaults(db_store=True)
+
+    args = parser.parse_args()
+    db_store = args.db_store
+    if db_store:
+        _ = make_forecast()
+    else:
+        _ = make_forecast(schema=None)
