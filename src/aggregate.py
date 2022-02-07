@@ -3,6 +3,8 @@ sys.path.insert(0, '..')
 import json
 import os
 from os.path import join as p_join
+import argparse
+from datetime import datetime
 
 import pandas as pd
 import sqlalchemy as sa
@@ -70,7 +72,7 @@ def make_daily_sales():
                     , techSize
                     , date asc
             ),
-            
+
             t_daily_purchases as 
             (   
                 select 
@@ -86,8 +88,34 @@ def make_daily_sales():
                     , techSize
                     , barcode
                     , cast(date as date)
+            ),
+
+            t_daily_storage as 
+            (
+                select
+                    cast(lastChangeDate as date) as day
+                    , supplierArticle
+                    , techSize
+                    , barcode
+                    , sum(quantity) as sum_quantity_storage
+                    , sum(isSupply) as sum_isSupply_storage
+                    , sum(isRealization) as sum_isRealization_storage
+                    , sum(quantityFull) as sum_quantityFull_storage
+                    , sum(quantityNotInOrders) as sum_quantityNotInOrders_storage
+                    , sum(inWayToClient) as sum_inWayToClient_storage
+                    , sum(inWayFromClient) as sum_inWayFromClient_storage
+                    , sum(daysOnSite) as sum_daysOnSite_storage
+                    , avg(Price) as avg_Price_storage
+                    , avg(Discount) as avg_Discount_storage
+                from
+                    wb_yarik.storage
+                group by
+                    supplierArticle
+                    , techSize
+                    , barcode
+                    , cast(lastChangeDate as date)
             )
-        
+
         select
             t1.supplierArticle
             , t1.techSize
@@ -96,26 +124,36 @@ def make_daily_sales():
             , t1.brand
             , t1.barcode
             , t1.day
-            
+
             , t1.avg_totalPrice
             , t1.avg_pricewithdisc
             , t1.avg_forPay
             , t1.avg_finishedPrice
-            
+
             , t1.sum_sales
             , t1.sum_returned
             , coalesce(t2.sum_purchases, 0) as sum_purchases
-            
+
             , t1.sum_q_totalPrice
             , t1.sum_q_pricewithdisc
             , t1.sum_q_forPay
             , t1.sum_q_finishedPrice
-            
+
             , t1.sum_q_totalPrice_returned
             , t1.sum_q_pricewithdisc_returned
             , t1.sum_q_forPay_returned
             , t1.sum_q_finishedPrice_returned
-            
+
+            , t3.sum_quantity_storage
+            , t3.sum_isSupply_storage
+            , t3.sum_isRealization_storage
+            , t3.sum_quantityFull_storage
+            , t3.sum_quantityNotInOrders_storage
+            , t3.sum_inWayToClient_storage
+            , t3.sum_inWayFromClient_storage
+            , t3.sum_daysOnSite_storage
+            , t3.avg_Price_storage
+            , t3.avg_Discount_storage
         from
             t_daily_sales t1
             left join
@@ -125,18 +163,39 @@ def make_daily_sales():
                 and t1.supplierArticle = t2.supplierArticle
                 and t1.techSize = t2.techSize
                 and t1.day = t2.day
+
+            left join
+                t_daily_storage t3
+            on
+                1 = 1
+                and t1.supplierArticle = t3.supplierArticle
+                and t1.techSize = t3.techSize
+                and t1.day = t3.day
         """,
         eng
     )
     return daily_sales_df
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    feature_parser = parser.add_mutually_exclusive_group(required=False)
+    feature_parser.add_argument('--store_db', dest='db_store', action='store_true')
+    feature_parser.add_argument('--dont_store_db', dest='db_store', action='store_false')
+    parser.set_defaults(db_store=True)
+
+    args = parser.parse_args()
+    db_store = args.db_store
+    
     daily_sales_df = make_daily_sales()
-    print(f"Сохраняем daily_sales...")
-    daily_sales_df.to_sql(
-        schema='wb_yarik',
-        name='daily_sales',
-        con=eng,
-        if_exists='replace'
-    )
-    print('ок')
+    if db_store:
+        try:
+            print(f"Сохраняем daily_sales...")
+            daily_sales_df.to_sql(
+                schema='wb_yarik',
+                name='daily_sales',
+                con=eng,
+                if_exists='replace'
+            )
+            print('ок')
+        except:
+            print(f'Не получилось сохранить daily_sales_df в базу данных (дата: {str(datetime.now())}')
