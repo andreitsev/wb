@@ -14,7 +14,7 @@ print('='*4 + 'Now:' + str(datetime.now()) + '='*40, end='\n'*2)
 try:
     from fabulous import color as fb_color
     color_print = lambda x, color='green': print(getattr(fb_color, color)(x)) if 'fb_color' in globals() else print(x)
-except:
+except Exception as e:
     color_print = lambda x, color='green': print(x)
 
 from src.parse_utils import (
@@ -30,7 +30,9 @@ from src.utils import create_wb_db_connection
 try:
     print('Инициализируем подключение к db...')
     eng = create_wb_db_connection()
-except:
+except Exception as e:
+    color_print('Exception raised!', color='red')
+    color_print(e, color='red')
     color_print('Не удалось подключиться к базе!', color='red')
 
 if 'PYTHONPATH' in os.environ:
@@ -50,7 +52,9 @@ try:
         wb_key=wb_key,
     )
     color_print('ок')
-except:
+except Exception as e:
+    color_print('Exception raised!', color='red')
+    color_print(e, color='red')
     supplies_df = None
     color_print('Поставки не спарсились!', color='red')
 
@@ -62,7 +66,9 @@ try:
         wb_key=wb_key,
     )
     color_print('ок')
-except:
+except Exception as e:
+    color_print('Exception raised!', color='red')
+    color_print(e, color='red')
     storage_df = None
     color_print('Склад не спарсился!', color='red')
 
@@ -75,7 +81,9 @@ try:
         flag=0,
     )
     color_print('ок')
-except:
+except Exception as e:
+    color_print('Exception raised!', color='red')
+    color_print(e, color='red')
     purchase_df = None
     color_print("Заказы не спарсились!", color='red')
 
@@ -88,7 +96,9 @@ try:
         flag=0,
     )
     color_print('ок')
-except:
+except Exception as e:
+    color_print('Exception raised!', color='red')
+    color_print(e, color='red')
     sales_df = None
     color_print("Продажи не спарсились!", color='red')
 # Отчёт о продажах по реализации
@@ -100,7 +110,9 @@ try:
         limit=100_000,
     )
     color_print('ок')
-except:
+except Exception as e:
+    color_print('Exception raised!', color='red')
+    color_print(e, color='red')
     report_df = None
     color_print("Отчёт о продажах по реализации не спарсился!", color='red')
 
@@ -116,7 +128,9 @@ if sales_df is not None:
                 if_exists='replace'
             )
             color_print("ок")
-        except:
+        except Exception as e:
+            color_print('Exception raised!', color='red')
+            color_print(e, color='red')
             color_print("Не удалось записать продажи в tmp базу!", color='red')
 
         print('t_main_sales union t_tmp_sales...')
@@ -209,7 +223,9 @@ if sales_df is not None:
                     eng
                 )
             color_print("ок")
-        except:
+        except Exception as e:
+            color_print('Exception raised!', color='red')
+            color_print(e, color='red')
             color_print("Не удалось объединить t_main_sales и t_tmp_sales!", color='red')
 
         print('Сохраняем обновлённые sales...')
@@ -222,7 +238,12 @@ if sales_df is not None:
             )
             color_print('ок')
 
-        except:
+
+        except Exception as e:
+
+            color_print('Exception raised!', color='red')
+
+            color_print(e, color='red')
             color_print('Что-то пошло не так: обновлённая таблица sales не сохранилась', color='red')
 
 if purchase_df is not None:
@@ -236,7 +257,9 @@ if purchase_df is not None:
                 if_exists='replace'
             )
             color_print("ок")
-        except:
+        except Exception as e:
+            color_print('Exception raised!', color='red')
+            color_print(e, color='red')
             color_print("Не удалось записать заказы в tmp базу!", color='red')
 
         print('t_main_purchases union t_tmp_purchases...')
@@ -309,7 +332,9 @@ if purchase_df is not None:
                 eng
             )
             color_print("ок")
-        except:
+        except Exception as e:
+            color_print('Exception raised!', color='red')
+            color_print(e, color='red')
             color_print("Не удалось объединить t_main_purchases и t_tmp_purchases!", color='red')
 
         try:
@@ -321,7 +346,12 @@ if purchase_df is not None:
             )
             color_print('ок')
 
-        except:
+
+        except Exception as e:
+
+            color_print('Exception raised!', color='red')
+
+            color_print(e, color='red')
             color_print('Что-то пошло не так: обновлённая таблица purchases не сохранилась', color='red')
 
 if storage_df is not None:
@@ -335,7 +365,9 @@ if storage_df is not None:
                 if_exists='replace'
             )
             color_print("ок")
-        except:
+        except Exception as e:
+            color_print('Exception raised!', color='red')
+            color_print(e, color='red')
             color_print("Не удалось записать склад в tmp базу!", color='red')
 
         print('t_main_storage union t_tmp_storage...')
@@ -410,7 +442,9 @@ if storage_df is not None:
                 eng
             )
             color_print("ок")
-        except:
+        except Exception as e:
+            color_print('Exception raised!', color='red')
+            color_print(e, color='red')
             color_print("Не удалось объединить t_main_storage и t_tmp_storage!", color='red')
 
         try:
@@ -422,7 +456,12 @@ if storage_df is not None:
             )
             color_print('ок')
 
-        except:
+
+        except Exception as e:
+
+            color_print('Exception raised!', color='red')
+
+            color_print(e, color='red')
             color_print('Что-то пошло не так: обновлённая таблица storage не сохранилась', color='red')
 
 if supplies_df is not None:
@@ -436,7 +475,9 @@ if supplies_df is not None:
                 if_exists='replace'
             )
             color_print("ок")
-        except:
+        except Exception as e:
+            color_print('Exception raised!', color='red')
+            color_print(e, color='red')
             color_print("Не удалось записать поставки в tmp базу!", color='red')
 
         print('t_main_supplies union t_tmp_supplies...')
@@ -497,7 +538,9 @@ if supplies_df is not None:
                 eng
             )
             color_print("ок")
-        except:
+        except Exception as e:
+            color_print('Exception raised!', color='red')
+            color_print(e, color='red')
             color_print("Не удалось объединить t_main_supplies и t_tmp_supplies", color='red')
 
         try:
@@ -509,7 +552,12 @@ if supplies_df is not None:
             )
             color_print('ок')
 
-        except:
+
+        except Exception as e:
+
+            color_print('Exception raised!', color='red')
+
+            color_print(e, color='red')
             color_print('Что-то пошло не так: обновлённая таблица supplies не сохранилась', color='red')
 
 if report_df is not None:
@@ -523,5 +571,7 @@ if report_df is not None:
                 if_exists='replace'
             )
             color_print('ок')
-        except:
+        except Exception as e:
+            color_print('Exception raised!', color='red')
+            color_print(e, color='red')
             color_print("Не удалось записать отчёт в db!", color='red')

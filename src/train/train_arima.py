@@ -190,7 +190,6 @@ if __name__ == '__main__':
     df_save_path = args.df_save_path
     df_load_path = args.df_load_path
     need_model_training = args.need_model_training
-
     if df_save_path is not None:
         eng = create_wb_db_connection()
         _ = make_df_for_arima(save_path=df_save_path)

@@ -310,7 +310,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     db_store = args.db_store
-    
+
     daily_sales_df = make_daily_sales()
     if db_store:
         try:
