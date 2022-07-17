@@ -27,29 +27,29 @@
     └── utils.py
 </pre>
 
-Пайплайн использования: (находясь в папке  проекта)
+Usage pipeline: (```$cd <project folder>```)
 
 0) 
 ```shell
 source env.sh
 ```
-1) Парсинг данных (и сохранение их в mysql базу данных)
+1) Raw data parsing (and loading to mysql database)
 ```python
 python3 src/parse_and_save_all.py
 ```
-2) Получение дневных продаж из сырых (и сохранение их в mysql базу данных)
+2) Getting processed daily sales from raw sales (and loading to mysql database)
 ```python
 python3 src/aggregate.py
 ```
-3) Обучение Арима моделей 
+3) Training ARIMA models
 ```python
 python3 src/train/train_arima.py
 ```
-4) Получение скоров от Арима моделей
+4) Making forecasts with trained ARIMA models
 ```python
 python3 src/predict/arimas_forecast.py
 ```
-5) Развёртываение Metabase в докере для BI аналитики
+5) Deploying Metabase (docker-based) as a dashboard
 ```shell
 docker run -d --name meta -p 3000:3000 \
           -v $PWD/metabase-data:/metabase-data \
@@ -57,6 +57,6 @@ docker run -d --name meta -p 3000:3000 \
         metabase/metabase
 ```
 
-Пример полученного дашборда:
+Example of the resulting dashboard:
 
 ![image](https://user-images.githubusercontent.com/27732957/152297312-b15bebe2-34c0-48cd-9d3c-03ca1ad21c52.png)
